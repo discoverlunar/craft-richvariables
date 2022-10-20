@@ -72,17 +72,20 @@ class DefaultController extends Controller
         if ($globalsSet) {
             // Get the field layout fields used for this global set
             $layout = $globalsSet->getFieldLayout();
-            $tagGroup= \craft\elements\Tag::find()->group('functionSynonyms')->all();
             if ($layout) {
                 $fieldLayoutFields = $layout->getCustomFields();
                 /** @var Field $field */
-                foreach ($tagGroup as $field) {
-                    // Add the field title and Reference Tag as per https://craftcms.com/docs/reference-tags
-                    $thisVar = [
-                        'title' =>$field->title,
-                        'text' => '{globalset:' . $field->id . ':' . $field->title . '}',
-                    ];
-                    $variablesList[] = $thisVar;
+                foreach ($fieldLayoutFields as $field) {
+                    foreach (self::VALID_FIELD_CLASSES as $fieldClass) {
+                        if ($field instanceof $fieldClass) {
+                            // Add the field title and Reference Tag as per https://craftcms.com/docs/reference-tags
+                            $thisVar = [
+                                'title' => $field->name,
+                                'text' => '{globalset:' . $globalsSet->attributes['id'] . ':' . $field->handle . '}',
+                            ];
+                            $variablesList[] = $thisVar;
+                        }
+                    }
                 }
             }
         }
